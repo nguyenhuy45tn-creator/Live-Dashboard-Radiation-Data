@@ -1,0 +1,4 @@
+apache-flink
+kafka-python
+pandas
+python-dotenv
