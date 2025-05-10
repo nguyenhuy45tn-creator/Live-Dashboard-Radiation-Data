@@ -7,13 +7,13 @@ from pyflink.datastream import StreamExecutionEnvironment, RuntimeExecutionMode
 from pyflink.datastream.connectors.file_system import FileSource, StreamFormat, FileSink, OutputFileConfig, RollingPolicy
 
 env = StreamExecutionEnvironment.get_execution_environment()
-env.set_runtime_mode(RuntimeExecutionMode.STREAMING)
+env.set_runtime_mode(RuntimeExecutionMode.BATCH)
 env.set_parallelism(1)
 
 
 ds = env.from_source(
     source=FileSource.for_record_stream_format(StreamFormat.text_line_format(),
-                                               "test_measurements.csv")
+                                               "test_data/test_measurements.csv")
                      .process_static_file_set().build(),
     watermark_strategy=WatermarkStrategy.for_monotonous_timestamps(),
     source_name="file_source"
