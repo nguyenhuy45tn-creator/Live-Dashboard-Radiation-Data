@@ -22,6 +22,6 @@ consumer = KafkaConsumer(
 print("[Consumer] Listening for messages...")
 try:
     for msg in consumer:
-        print(f"[Consumer] Received: {msg.value}")
+        print(f"[Consumer (Topic: {TOPIC})] Received: {msg.value}")
 except KeyboardInterrupt:
     print("Consumer stopped.")

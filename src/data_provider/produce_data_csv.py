@@ -31,7 +31,7 @@ def stream_csv_to_kafka(file_path, topic, chunk_size=100):
 
         for _, row in chunk.iterrows():
             record = row.to_dict()
-            print(f"[Producer] Sending: {record}")
+            print(f"[Producer (Topic: {TOPIC})] Sending: {record}")
             producer.send(topic, record)
             producer.flush()
             time.sleep(SEND_INTERVAL) 
