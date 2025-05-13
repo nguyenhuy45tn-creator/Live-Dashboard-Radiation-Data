@@ -1,2 +1,15 @@
 test_data/*
 temp*
+bin/*
+conf/*
+examples/*
+lib/*
+licenses/*
+log/*
+opt/*
+plugins/*
+License 
+*.csv
+NOTICE
+*.zip
+*.txt
