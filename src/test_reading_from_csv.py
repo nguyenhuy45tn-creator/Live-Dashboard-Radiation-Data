@@ -9,6 +9,7 @@ from pyflink.datastream.connectors.file_system import FileSource, StreamFormat, 
 env = StreamExecutionEnvironment.get_execution_environment()
 env.set_runtime_mode(RuntimeExecutionMode.BATCH)
 env.set_parallelism(1)
+env.add_python_file("test_data/test_measurements.csv")
 
 
 ds = env.from_source(
