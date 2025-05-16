@@ -5,7 +5,7 @@ import time
 from dotenv import load_dotenv
 from pprint import pprint
 
-load_dotenv()
+load_dotenv(override=True)
 
 TOPIC = os.getenv("KAFKA_TOPIC")
 BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")

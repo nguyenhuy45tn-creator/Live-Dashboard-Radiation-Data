@@ -4,7 +4,7 @@ from kafka import KafkaConsumer
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 TOPIC = os.getenv("KAFKA_TOPIC")
 BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")

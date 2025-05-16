@@ -5,7 +5,7 @@ import time
 from kafka import KafkaProducer
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 CSV_FILE_PATH = os.getenv("CSV_FILE_PATH")
 TOPIC = os.getenv("KAFKA_TOPIC")
