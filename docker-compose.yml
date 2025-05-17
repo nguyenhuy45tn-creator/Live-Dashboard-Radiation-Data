@@ -1,7 +1,8 @@
 version: "2.2"
 services:
   jobmanager:
-    image: docker-flink-2
+    image: pyflink
+    build: .
     ports:
       - "8081:8081"
     command: jobmanager
@@ -11,7 +12,8 @@ services:
         jobmanager.rpc.address: jobmanager        
 
   taskmanager:
-    image: docker-flink-2
+    image: pyflink
+    build: .
     depends_on:
       - jobmanager
     command: taskmanager
@@ -20,4 +22,15 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2  
+        taskmanager.numberOfTaskSlots: 2        
+  sql-client:
+    image: pyflink
+    build: .
+    command: bin/sql-client.sh
+    depends_on:
+      - jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager 
