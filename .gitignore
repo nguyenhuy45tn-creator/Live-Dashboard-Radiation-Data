@@ -9,7 +9,6 @@ log/*
 opt/*
 plugins/*
 License 
-*.csv
 NOTICE
 *.zip
 *.txt
