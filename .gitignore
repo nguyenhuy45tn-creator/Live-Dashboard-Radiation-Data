@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -195,3 +196,8 @@ NOTICE
 *.zip
 *.txt
 .venv/*
+
+temp*
+venv
+.env
+.vscode/
