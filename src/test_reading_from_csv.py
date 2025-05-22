@@ -46,7 +46,7 @@ ds = ds.flat_map(split,
 
 ds.sink_to(
     sink=FileSink.for_row_format(
-        base_path="temp.txt",
+        base_path="out",
         encoder=Encoder.simple_string_encoder())
     .with_output_file_config(
         OutputFileConfig.builder()
