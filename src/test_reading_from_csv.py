@@ -9,6 +9,7 @@ from pyflink.datastream.connectors.file_system import FileSource, StreamFormat, 
 env = StreamExecutionEnvironment.get_execution_environment()
 env.set_runtime_mode(RuntimeExecutionMode.BATCH)
 env.set_parallelism(1)
+env.add_python_file("test_data/test_measurements.csv")
 
 
 ds = env.from_source(
@@ -45,7 +46,7 @@ ds = ds.flat_map(split,
 
 ds.sink_to(
     sink=FileSink.for_row_format(
-        base_path="temp.txt",
+        base_path="out",
         encoder=Encoder.simple_string_encoder())
     .with_output_file_config(
         OutputFileConfig.builder()

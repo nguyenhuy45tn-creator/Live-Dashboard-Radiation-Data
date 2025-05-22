@@ -1,5 +1,57 @@
-version: '3.8'
+
+version: "2.2"
 services:
+
+  jobmanager:
+    image: pyflink
+    build: .
+    ports:
+      - "8081:8081"
+    volumes:
+      - type: bind
+        source: ./src
+        target: /opt/flink/src
+      - type: bind
+        source: ./out
+        target: /opt/flink/out
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager        
+
+  taskmanager:
+    image: pyflink
+    build: .
+    depends_on:
+      - jobmanager
+    volumes:
+      - type: bind
+        source: ./src
+        target: /opt/flink/src
+      - type: bind
+        source: ./out
+        target: /opt/flink/out
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2    
+
+  sql-client:
+    image: pyflink
+    build: .
+    command: bin/sql-client.sh
+    depends_on:
+      - jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager 
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
@@ -28,5 +80,4 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-      
 
