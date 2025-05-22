@@ -1,4 +1,4 @@
-test_data/*
+
 temp*
 bin/*
 conf/*
@@ -13,3 +13,4 @@ License
 NOTICE
 *.zip
 *.txt
+.venv/*
