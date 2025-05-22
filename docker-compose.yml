@@ -4,6 +4,7 @@ services:
 
   jobmanager:
     image: pyflink
+    platform: linux/amd64
     build: .
     ports:
       - "8081:8081"
@@ -22,6 +23,7 @@ services:
 
   taskmanager:
     image: pyflink
+    platform: linux/amd64
     build: .
     depends_on:
       - jobmanager
@@ -42,6 +44,7 @@ services:
 
   sql-client:
     image: pyflink
+    platform: linux/amd64
     build: .
     command: bin/sql-client.sh
     depends_on:
