@@ -2352,36 +2352,6 @@
       "originalText": "Server: Dash",
       "autoResize": true,
       "lineHeight": 1.25
-    },
-    {
-      "id": "T0YXCFGbdCRCWD-eW8yGi",
-      "type": "rectangle",
-      "x": 80,
-      "y": 1200,
-      "width": 520,
-      "height": 200,
-      "angle": 0,
-      "strokeColor": "#1e1e1e",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [],
-      "frameId": null,
-      "index": "b0I",
-      "roundness": {
-        "type": 3
-      },
-      "seed": 582704156,
-      "version": 34,
-      "versionNonce": 464615580,
-      "isDeleted": false,
-      "boundElements": [],
-      "updated": 1747908017701,
-      "link": null,
-      "locked": false
     }
   ],
   "appState": {
