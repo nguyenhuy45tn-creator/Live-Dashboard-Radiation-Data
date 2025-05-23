@@ -84,3 +84,15 @@ services:
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
 
+
+  kafka-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    depends_on:
+      - broker
+    environment:
+      KAFKA_TOPIC: input_topic
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: always
+

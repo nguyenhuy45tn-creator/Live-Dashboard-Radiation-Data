@@ -10,3 +10,4 @@ RUN pip install apache-flink==2.0.0
 
 ADD src/ .
 ADD test_data/ test_data/
+ADD jars/* /opt/flink/lib/

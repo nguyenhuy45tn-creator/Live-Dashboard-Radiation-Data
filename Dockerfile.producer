@@ -1,0 +1,10 @@
+FROM python:3.10.12
+
+WORKDIR /app
+
+COPY src/data_provider/ .
+COPY requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python", "producer-test.py"]

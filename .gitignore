@@ -201,3 +201,4 @@ temp*
 venv
 .env
 .vscode/
+out
