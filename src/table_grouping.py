@@ -48,11 +48,14 @@ table = t_env.from_path("datasource")
 
 sink_ddl = f"""
     create table Outputs (
+        ts TIMESTAMP,
         longtitude STRING,
         latitude STRING,
         measurement FLOAT
     ) with (
-        'connector' = 'print'
+        'connector' = 'filesystem',
+        'format' = 'csv',
+        'path' = '{result_data_path}'
     )
     """
 t_env.execute_sql(sink_ddl)
@@ -62,10 +65,12 @@ table = (table
                 .every(lit(2).seconds)
                 .on(col("timestamp")).alias("ts"))
         .group_by(col('longtitude'), col('latitude'), col('ts'))
-        .select(col('longtitude'), col('latitude'),col('measurement').avg)
+        .select(col('ts').start, col('longtitude'), col('latitude'),col('measurement').avg)
         )
 
 table.execute_insert("Outputs").wait()
+
+
 
 
 
