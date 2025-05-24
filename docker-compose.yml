@@ -19,7 +19,10 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager        
+        jobmanager.rpc.address: jobmanager    
+
+    networks:
+      - kafka-flink-network    
 
   taskmanager:
     image: pyflink
@@ -40,7 +43,9 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2    
+        taskmanager.numberOfTaskSlots: 2   
+    networks:
+      - kafka-flink-network 
 
   sql-client:
     image: pyflink
@@ -66,7 +71,7 @@ services:
     hostname: broker
     container_name: broker
     ports:
-    - 29092:29092
+      - 9092:9092
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
@@ -83,6 +88,8 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    networks:
+      - kafka-flink-network
 
 
   kafka-producer:
@@ -93,6 +100,11 @@ services:
       - broker
     environment:
       KAFKA_TOPIC: input_topic
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
     restart: always
+    networks:
+      - kafka-flink-network
 
+networks:
+  kafka-flink-network:
+    driver: bridge

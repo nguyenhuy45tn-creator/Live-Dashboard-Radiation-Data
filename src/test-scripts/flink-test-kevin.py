@@ -1,49 +1,50 @@
-from pyflink.common import SimpleStringSchema, Types
-from pyflink.common.serialization import Encoder
 from pyflink.datastream import StreamExecutionEnvironment
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaSink, KafkaOffsetsInitializer, KafkaRecordSerializationSchema
+from pyflink.common.serialization import SimpleStringSchema
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitializer
+from pyflink.datastream.connectors.kafka import KafkaSink, KafkaRecordSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy
+from pyflink.common import Types
 
 def main():
-    # Set up the execution environment
+    # Create execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
-    env.set_parallelism(1)
-
-    # Define Kafka source
+    env.set_parallelism(1)  # Set parallelism to 1 for testing
+    
+    # Add Kafka connector dependencies
+    # Update JAR references to match the environment variables
+    env.add_jars("file:///opt/flink/lib/flink-connector-kafka-1.17.2.jar")
+    env.add_jars("file:///opt/flink/lib/kafka-clients-3.1.0.jar")
+    env.add_jars("file:///opt/flink/lib/flink-sql-connector-kafka-1.17.2.jar")
+    
+    # Create source and sink
     source = KafkaSource.builder() \
-        .set_bootstrap_servers("localhost:9092") \
+        .set_bootstrap_servers("broker:9092") \
         .set_topics("input_topic") \
-        .set_group_id("flink_consumer_group") \
+        .set_group_id("flink-radiation-group") \
         .set_starting_offsets(KafkaOffsetsInitializer.earliest()) \
         .set_value_only_deserializer(SimpleStringSchema()) \
         .build()
 
-    # Create data stream from Kafka source
+    sink = KafkaSink.builder() \
+        .set_bootstrap_servers("broker:9092") \
+        .set_record_serializer(KafkaRecordSerializationSchema.builder()
+            .set_topic("output_topic")
+            .set_value_serialization_schema(SimpleStringSchema())
+            .build()) \
+        .build()
+    
+    # Create the pipeline
     stream = env.from_source(
         source,
         WatermarkStrategy.no_watermarks(),
         "Kafka Source"
     )
-
-    # Define processing logic (e.g., convert message to uppercase)
-    processed_stream = stream.map(lambda value: value.upper(), output_type=Types.STRING())
-
-    # Define Kafka sink
-    sink = KafkaSink.builder() \
-        .set_bootstrap_servers("localhost:9092") \
-        .set_record_serializer(
-            KafkaRecordSerializationSchema.builder()
-                .set_topic("output_topic")
-                .set_value_serialization_schema(SimpleStringSchema())
-                .build()
-        ) \
-        .build()
-
-    # Add sink to the processed stream
-    processed_stream.sink_to(sink)
-
-    # Execute the Flink job
-    env.execute("Kafka Stream Processing Job")
+    
+    # Write to sink
+    stream.sink_to(sink)
+    
+    # Execute the job
+    env.execute("Kafka to Kafka Processing")
 
 if __name__ == '__main__':
     main()
