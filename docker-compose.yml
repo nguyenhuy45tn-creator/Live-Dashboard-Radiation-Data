@@ -100,10 +100,44 @@ services:
       - broker
     environment:
       KAFKA_TOPIC: input_topic
-      KAFKA_BOOTSTRAP_SERVERS: broker:29092
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
     restart: always
     networks:
       - kafka-flink-network
+
+  flink-job-submitter:
+    image: pyflink
+    build: .
+    platform: linux/amd64
+    depends_on:
+      - jobmanager
+    volumes:
+      - type: bind
+        source: ./src
+        target: /opt/flink/src
+      - type: bind
+        source: ./out
+        target: /opt/flink/out
+    # environment:
+    #   - |
+    #     FLINK_PROPERTIES=
+    #     pipeline.jars: file:///opt/flink/lib/flink-connector-kafka-1.17.2.jar,file:///opt/flink/lib/kafka-clients-3.1.0.jar,file:///opt/flink/lib/flink-sql-connector-kafka-1.17.2.jar
+    command: python /opt/flink/src/test-scripts/kafka-flink-conn-test.py
+    networks:
+      - kafka-flink-network  
+
+  kafka-output-topic-consumer:
+    image: bitnami/kafka:latest
+    depends_on:
+      - broker
+    command: >
+      kafka-console-consumer.sh
+        --bootstrap-server broker:9092
+        --topic output_topic
+        --from-beginning
+    networks:
+      - kafka-flink-network
+
 
 networks:
   kafka-flink-network:
