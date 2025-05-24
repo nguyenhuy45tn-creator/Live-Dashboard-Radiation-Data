@@ -1,4 +1,4 @@
-FROM flink:2.0.0
+FROM flink:1.20.1
 
 
 # install python3 and pip3
