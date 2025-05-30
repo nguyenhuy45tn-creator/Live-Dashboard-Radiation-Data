@@ -123,7 +123,7 @@ services:
       - type: bind
         source: ./out
         target: /opt/flink/out
-    command: flink run -py /opt/flink/src/test-scripts/kafka-flink-conn-test.py
+    command: flink run -py /opt/flink/src/flink_jobs/stream_data_job.py
     networks:
       - kafka-flink-network  
 
