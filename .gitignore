@@ -202,3 +202,4 @@ venv
 .env
 .vscode/
 out
+data/
