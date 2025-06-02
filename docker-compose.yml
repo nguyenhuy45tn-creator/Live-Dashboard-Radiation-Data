@@ -19,7 +19,10 @@ services:
     environment:
       - |
         FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager        
+        jobmanager.rpc.address: jobmanager    
+
+    networks:
+      - kafka-flink-network    
 
   taskmanager:
     image: pyflink
@@ -40,7 +43,9 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2    
+        taskmanager.numberOfTaskSlots: 2   
+    networks:
+      - kafka-flink-network 
 
   sql-client:
     image: pyflink
@@ -66,7 +71,7 @@ services:
     hostname: broker
     container_name: broker
     ports:
-    - 29092:29092
+      - 9092:9092
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
@@ -83,4 +88,58 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    networks:
+      - kafka-flink-network
 
+
+  kafka-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    depends_on:
+      - broker
+    environment:
+      CSV_FILE_PATH: /opt/flink/data/measurements-out.csv
+      KAFKA_TOPIC: input_topic
+      KAFKA_BOOTSTRAP_SERVERS: broker:9092
+      CHUNK_SIZE: 10
+      SEND_INTERVAL: 3
+    restart: always
+    networks:
+      - kafka-flink-network
+    volumes:
+      - ./data:/opt/flink/data
+
+  flink-job-submitter:
+    image: pyflink
+    build: .
+    platform: linux/amd64
+    depends_on:
+      - jobmanager
+    volumes:
+      - type: bind
+        source: ./src
+        target: /opt/flink/src
+      - type: bind
+        source: ./out
+        target: /opt/flink/out
+    command: flink run -py /opt/flink/src/flink_jobs/stream_data_job.py
+    networks:
+      - kafka-flink-network  
+
+  kafka-output-topic-consumer:
+    image: bitnami/kafka:latest
+    depends_on:
+      - broker
+    command: >
+      kafka-console-consumer.sh
+        --bootstrap-server broker:9092
+        --topic output_topic
+        --from-beginning
+    networks:
+      - kafka-flink-network
+
+
+networks:
+  kafka-flink-network:
+    driver: bridge
