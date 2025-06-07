@@ -2,58 +2,45 @@
 version: "2.2"
 services:
 
-  jobmanager:
-    image: pyflink
-    platform: linux/amd64
-    build: .
-    ports:
-      - "8081:8081"
-    volumes:
-      - type: bind
-        source: ./src
-        target: /opt/flink/src
-      - type: bind
-        source: ./out
-        target: /opt/flink/out
-    command: jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager        
+  # jobmanager:
+  #   image: pyflink
+  #   platform: linux/amd64
+  #   build: .
+  #   ports:
+  #     - "8081:8081"
+  #   volumes:
+  #     - type: bind
+  #       source: ./src
+  #       target: /opt/flink/src
+  #     - type: bind
+  #       source: ./out
+  #       target: /opt/flink/out
+  #   command: jobmanager
+  #   environment:
+  #     - |
+  #       FLINK_PROPERTIES=
+  #       jobmanager.rpc.address: jobmanager        
 
-  taskmanager:
-    image: pyflink
-    platform: linux/amd64
-    build: .
-    depends_on:
-      - jobmanager
-    volumes:
-      - type: bind
-        source: ./src
-        target: /opt/flink/src
-      - type: bind
-        source: ./out
-        target: /opt/flink/out
-    command: taskmanager
-    scale: 1
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2    
-
-  sql-client:
-    image: pyflink
-    platform: linux/amd64
-    build: .
-    command: bin/sql-client.sh
-    depends_on:
-      - jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        rest.address: jobmanager 
+  # taskmanager:
+  #   image: pyflink
+  #   platform: linux/amd64
+  #   build: .
+  #   depends_on:
+  #     - jobmanager
+  #   volumes:
+  #     - type: bind
+  #       source: ./src
+  #       target: /opt/flink/src
+  #     - type: bind
+  #       source: ./out
+  #       target: /opt/flink/out
+  #   command: taskmanager
+  #   scale: 1
+  #   environment:
+  #     - |
+  #       FLINK_PROPERTIES=
+  #       jobmanager.rpc.address: jobmanager
+  #       taskmanager.numberOfTaskSlots: 2
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -83,4 +70,27 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+  db:
+      image: postgres
+      ports:
+      - '5432:5432'
+      restart: always
+      # set shared memory limit when using docker compose
+      shm_size: 128mb
+      # or set shared memory limit when deploy via swarm stack
+      #volumes:
+      #  - type: tmpfs
+      #    target: /dev/shm
+      #    tmpfs:
+      #      size: 134217728 # 128*2^20 bytes = 128Mb
+      environment:
+        POSTGRES_PASSWORD: example
+# db accounts [username, password]:
+# - [postgres, example]
+# - [flask_server, iloveyou]
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 
