@@ -136,22 +136,22 @@ services:
     volumes:
       - ./data:/opt/flink/data
 
-  flink-job-submitter:
-    image: pyflink
-    build: .
-    platform: linux/amd64
-    depends_on:
-      - jobmanager
-    volumes:
-      - type: bind
-        source: ./src
-        target: /opt/flink/src
-      - type: bind
-        source: ./out
-        target: /opt/flink/out
-    command: flink run -py /opt/flink/src/flink_jobs/stream_data_job.py
-    networks:
-      - kafka-flink-network  
+  # flink-job-submitter:
+  #   image: pyflink
+  #   build: .
+  #   platform: linux/amd64
+  #   depends_on:
+  #     - jobmanager
+  #   volumes:
+  #     - type: bind
+  #       source: ./src
+  #       target: /opt/flink/src
+  #     - type: bind
+  #       source: ./out
+  #       target: /opt/flink/out
+  #   command: flink run -py /opt/flink/src/flink_jobs/stream_data_job.py
+  #   networks:
+  #     - kafka-flink-network  
 
   kafka-output-topic-consumer:
     image: bitnami/kafka:latest
