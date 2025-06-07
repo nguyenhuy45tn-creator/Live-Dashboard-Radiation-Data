@@ -20,45 +20,44 @@ services:
   #     - |
   #       FLINK_PROPERTIES=
   #       jobmanager.rpc.address: jobmanager        
+  #   networks:
+  #     - kafka-flink-network    
 
-    networks:
-      - kafka-flink-network    
+  # taskmanager:
+  #   image: pyflink
+  #   platform: linux/amd64
+  #   build: .
+  #   depends_on:
+  #     - jobmanager
+  #   volumes:
+  #     - type: bind
+  #       source: ./src
+  #       target: /opt/flink/src
+  #     - type: bind
+  #       source: ./out
+  #       target: /opt/flink/out
+  #   command: taskmanager
+  #   scale: 1
+  #   environment:
+  #     - |
+  #       FLINK_PROPERTIES=
+  #       jobmanager.rpc.address: jobmanager
+  #       taskmanager.numberOfTaskSlots: 2   
+  #   networks:
+  #     - kafka-flink-network 
 
-  taskmanager:
-    image: pyflink
-    platform: linux/amd64
-    build: .
-    depends_on:
-      - jobmanager
-    volumes:
-      - type: bind
-        source: ./src
-        target: /opt/flink/src
-      - type: bind
-        source: ./out
-        target: /opt/flink/out
-    command: taskmanager
-    scale: 1
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2   
-    networks:
-      - kafka-flink-network 
-
-  sql-client:
-    image: pyflink
-    platform: linux/amd64
-    build: .
-    command: bin/sql-client.sh
-    depends_on:
-      - jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: jobmanager
-        rest.address: jobmanager 
+  # sql-client:
+  #   image: pyflink
+  #   platform: linux/amd64
+  #   build: .
+  #   command: bin/sql-client.sh
+  #   depends_on:
+  #     - jobmanager
+  #   environment:
+  #     - |
+  #       FLINK_PROPERTIES=
+  #       jobmanager.rpc.address: jobmanager
+  #       rest.address: jobmanager 
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -88,6 +87,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
   db:
       image: postgres
       ports:
@@ -103,9 +103,12 @@ services:
       #      size: 134217728 # 128*2^20 bytes = 128Mb
       environment:
         POSTGRES_PASSWORD: example
+      networks:
+      - kafka-flink-network
 # db accounts [username, password]:
 # - [postgres, example]
 # - [flask_server, iloveyou]
+
   adminer:
     image: adminer
     restart: always
