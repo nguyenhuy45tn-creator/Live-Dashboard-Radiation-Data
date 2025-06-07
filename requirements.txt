@@ -3,3 +3,6 @@ kafka-python
 pandas
 python-dotenv
 dash
+psycopg2-binary
+Flask-SQLAlchemy
+ipykernel
