@@ -1,3 +1,8 @@
+apache-flink==1.20.1
 kafka-python
 pandas
 python-dotenv
+dash
+psycopg2-binary
+Flask-SQLAlchemy
+ipykernel
