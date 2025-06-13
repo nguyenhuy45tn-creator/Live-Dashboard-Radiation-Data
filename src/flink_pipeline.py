@@ -1,58 +1,61 @@
 from pyflink.table import (EnvironmentSettings, TableEnvironment, TableDescriptor, Schema, DataTypes, FormatDescriptor)
 from pyflink.table.expressions import col, lit
 from pyflink.table.window import Slide
+from pathlib import Path
 
 # environment configuration
 t_env = TableEnvironment.create(
     environment_settings=EnvironmentSettings.in_streaming_mode())
 
-path_connector = "file:///mnt/c/Users/hoang/Documents/MasterStudium/04_semester/BigData/bd25_project_m11_c/flink-1.20.1/lib/flink-connector-jdbc-3.3.0-1.20.jar"
-path_driver = "file:///mnt/c/Users/hoang/Documents/MasterStudium/04_semester/BigData/bd25_project_m11_c/flink-2.0.0/lib/postgresql-42.7.6.jar"
+# Define the directory containing your connector JARs
+jar_dir = Path(r"jar-files")
 
+jar_files = jar_dir.glob("*.jar")
 
+jar_files_abs_address = []
+for file in jar_files:
+    jar_files_abs_address.append(f"file://{file.absolute().as_posix()}")
 
-path = ";".join([path_connector, path_driver])
-
-t_env.get_config().set("pipeline.jars", path)
+# Dynamically add all JARs from the specified directory
+# jar_files = ["file:///mnt/c/Users/hoang/Documents/MasterStudium/04_semester/BigData/bd25_project_m11_c/flink-1.20.1/lib/flink-sql-connector-kafka-3.3.0-1.20.jar",
+# "file:///mnt/c/Users/hoang/Documents/MasterStudium/04_semester/BigData/bd25_project_m11_c/flink-1.20.1/lib/flink-connector-jdbc-3.3.0-1.20.jar",
+# "file:///mnt/c/Users/hoang/Documents/MasterStudium/04_semester/BigData/bd25_project_m11_c/flink-1.20.1/lib/postgresql-42.7.6.jar"
+# ]
+print(jar_files)
+# Apply the configuration to the TableEnvironment
+t_env.get_config().set("pipeline.jars", ";".join(jar_files_abs_address))
 
 # register Orders table and Result table sink in table environment
 source_data_path = "./test_data/test_measurements.csv"
 result_data_path = "./out/"
-# source_ddl = f"""
-#         create table (
-#             ts DATETIME,
-#             longtitude BIGINT,
-#             c BIGINT,
-#             rowtime TIMESTAMP(3),
-#             WATERMARK FOR rowtime AS rowtime - INTERVAL '1' SECOND
-#         ) with (
-#             'connector' = 'filesystem',
-#             'format' = 'csv',
-#             'path' = '{source_data_path}'
-#         )
-#         """
 
-t_env.create_table(
-    'raw_data',
-    TableDescriptor.for_connector('filesystem')
-        .schema(Schema.new_builder()
-                .column('timestamp', DataTypes.TIMESTAMP())
-                .column('longtitude', DataTypes.VARCHAR(20))
-                .column('latitude', DataTypes.VARCHAR(20))
-                .column('measurement', DataTypes.FLOAT())
-                .column("Unit", DataTypes.VARCHAR(10))
-                .column('Location Name', DataTypes.STRING())
-                .column('Device ID', DataTypes.STRING())
-                .column('MD5Sum', DataTypes.STRING())
-                .column("Height", DataTypes.STRING())
-                .column("Surface", DataTypes.STRING())
-                .column("Radiation", DataTypes.STRING())
-                .column("Uploaded Time", DataTypes.STRING())
-                .column("Loader ID",DataTypes.STRING())
-                .build())
-        .option('path', source_data_path)
-        .format('csv')
-        .build())
+
+
+t_env.execute_sql(f"""
+    CREATE TABLE datasource (
+        `Captured Time` TIMESTAMP(3),
+        `Latitude` VARCHAR(20),
+        `Longitude` VARCHAR(20),
+        `Value` DOUBLE,
+        `Unit` STRING NULL,
+        `Location Name` STRING NULL,
+        `Device ID` STRING NULL,
+        `MD5Sum` STRING NULL,
+        `Height` STRING NULL,
+        `Surface` STRING NULL,
+        `Radiation` STRING NULL,
+        `Uploaded Time` STRING NULL,
+        `Loader ID` STRING NULL,
+        WATERMARK FOR `Captured Time` AS `Captured Time` - INTERVAL '5' SECOND
+    ) WITH (
+        'connector' = 'kafka',
+        'topic' = 'safecast_data_1',
+        'properties.bootstrap.servers' = 'localhost:29092',
+        'properties.group.id' = 'default-group',
+        'scan.startup.mode' = 'earliest-offset',
+        'format' = 'csv'
+    )
+""")
 
 t_env.create_table(
     'watermarked_data',
@@ -72,11 +75,11 @@ t_env.create_table(
 
 t_env.execute_sql("""
 INSERT INTO watermarked_data
-SELECT CAST(`timestamp` AS TIMESTAMP(3)) AS `timestamp`, 
-        longtitude, 
-        latitude, 
-        measurement
-FROM raw_data;
+SELECT CAST(`Captured Time` AS TIMESTAMP(3)) AS `timestamp`, 
+        `Longitude`, 
+        `Latitude`, 
+        CAST(`Value` AS FLOAT) as measurement
+FROM datasource;
 """).wait()
 
 table = t_env.from_path('watermarked_data')
@@ -154,9 +157,6 @@ table = t_env.from_path("Outputs")
 pdf = table.to_pandas()
 
 pdf.to_csv("./output/temp_result/result.csv")
-
-
-
 
 
 

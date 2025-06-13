@@ -16,7 +16,7 @@ SEND_INTERVAL = int(os.getenv("SEND_INTERVAL", 2))
 def init_kafka_producer():
     return KafkaProducer(
         bootstrap_servers=BOOTSTRAP_SERVERS,
-        value_serializer=lambda v: json.dumps(v).encode('utf-8')
+        value_serializer=lambda v: v.encode()
     )
 
 def stream_csv_to_kafka(file_path, topic, chunk_size=100):
@@ -24,18 +24,24 @@ def stream_csv_to_kafka(file_path, topic, chunk_size=100):
     header = None
 
     print(f"Reading CSV in chunks of {chunk_size} rows...")
-    for chunk in pd.read_csv(file_path, chunksize=chunk_size):
-        if header is None:
-            header = list(chunk.columns)
-            print(f"CSV Header: {header}")
+    # for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+    #     if header is None:
+    #         header = list(chunk.columns)
+    #         print(f"CSV Header: {header}")
 
-        for _, row in chunk.iterrows():
-            record = row.to_dict()
+    #     for _, row in chunk.iterrows():
+    #         record = row.to_dict()
+    #         print(f"[Producer (Topic: {TOPIC})] Sending: {record}")
+    #         producer.send(topic, record)
+    #         producer.flush()
+    #         time.sleep(SEND_INTERVAL) 
+    with open(file_path,'r') as file:
+        for line in file:
+            record = line
             print(f"[Producer (Topic: {TOPIC})] Sending: {record}")
             producer.send(topic, record)
             producer.flush()
             time.sleep(SEND_INTERVAL) 
-
     print("Finished streaming CSV to Kafka.")
     producer.close()
 
