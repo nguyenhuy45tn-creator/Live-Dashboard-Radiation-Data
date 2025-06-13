@@ -47,7 +47,7 @@ t_env.execute_sql(f"""
         WATERMARK FOR `Captured Time` AS `Captured Time` - INTERVAL '5' SECOND
     ) WITH (
         'connector' = 'filesystem',
-        'path'= 'file:///{test_data_path.absolute().as_posix()[5:]}',
+        'path'= 'file:///{test_data_path.absolute().as_posix()}',
         'format'='csv'
     )
 """)
