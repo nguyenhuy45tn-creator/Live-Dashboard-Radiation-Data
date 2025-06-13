@@ -3,7 +3,7 @@ version: "2.2"
 services:
 
   # jobmanager:
-  #   image: pyflink
+  #   image: flink:1.20.1-scala_2.12
   #   platform: linux/amd64
   #   build: .
   #   ports:
@@ -24,7 +24,7 @@ services:
   #     - kafka-flink-network    
 
   # taskmanager:
-  #   image: pyflink
+  #   image: flink:1.20.1-scala_2.12
   #   platform: linux/amd64
   #   build: .
   #   depends_on:
@@ -46,19 +46,6 @@ services:
   #   networks:
   #     - kafka-flink-network 
 
-  # sql-client:
-  #   image: pyflink
-  #   platform: linux/amd64
-  #   build: .
-  #   command: bin/sql-client.sh
-  #   depends_on:
-  #     - jobmanager
-  #   environment:
-  #     - |
-  #       FLINK_PROPERTIES=
-  #       jobmanager.rpc.address: jobmanager
-  #       rest.address: jobmanager 
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
@@ -71,6 +58,7 @@ services:
     container_name: broker
     ports:
       - 9092:9092
+      - 29092:29092
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
@@ -118,23 +106,23 @@ services:
       - kafka-flink-network
 
 
-  kafka-producer:
-    build:
-      context: .
-      dockerfile: Dockerfile.producer
-    depends_on:
-      - broker
-    environment:
-      CSV_FILE_PATH: /opt/flink/data/measurements-out.csv
-      KAFKA_TOPIC: input_topic
-      KAFKA_BOOTSTRAP_SERVERS: broker:9092
-      CHUNK_SIZE: 10
-      SEND_INTERVAL: 3
-    restart: always
-    networks:
-      - kafka-flink-network
-    volumes:
-      - ./data:/opt/flink/data
+  # kafka-ui:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.producer
+  #   depends_on:
+  #     - broker
+  #   environment:
+  #     CSV_FILE_PATH: /opt/flink/data/measurements-out.csv
+  #     KAFKA_TOPIC: input_topic
+  #     KAFKA_BOOTSTRAP_SERVERS: broker:9092
+  #     CHUNK_SIZE: 10
+  #     SEND_INTERVAL: 3
+  #   restart: always
+  #   networks:
+  #     - kafka-flink-network
+  #   volumes:
+  #     - ./data:/opt/flink/data
 
   # flink-job-submitter:
   #   image: pyflink
@@ -153,15 +141,12 @@ services:
   #   networks:
   #     - kafka-flink-network  
 
-  kafka-output-topic-consumer:
-    image: bitnami/kafka:latest
-    depends_on:
-      - broker
-    command: >
-      kafka-console-consumer.sh
-        --bootstrap-server broker:9092
-        --topic output_topic
-        --from-beginning
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    ports:
+      - 28080:8080
+    environment:
+      - DYNAMIC_CONFIG_ENABLED=true
     networks:
       - kafka-flink-network
 

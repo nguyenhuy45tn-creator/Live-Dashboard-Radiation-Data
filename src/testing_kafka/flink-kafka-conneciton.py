@@ -26,8 +26,10 @@ print(jar_files)
 # Apply the configuration to the TableEnvironment
 t_env.get_config().set("pipeline.jars", ";".join(jar_files_abs_address))
 
+test_data_path = Path("test_data/test_measurements.csv")
+
 # Define the Kafka source table
-t_env.execute_sql("""
+t_env.execute_sql(f"""
     CREATE TABLE datasource (
         `Captured Time` TIMESTAMP(3),
         `Latitude` DOUBLE,
@@ -45,7 +47,7 @@ t_env.execute_sql("""
         WATERMARK FOR `Captured Time` AS `Captured Time` - INTERVAL '5' SECOND
     ) WITH (
         'connector' = 'filesystem',
-        'path'= 'file:///mnt/c/Users/hoang/Documents/MasterStudium/04_semester/BigData/bd25_project_m11_c/test_data/test_measurements.csv',
+        'path'= 'file:///{test_data_path.absolute().as_posix()[5:]}',
         'format'='csv'
     )
 """)
