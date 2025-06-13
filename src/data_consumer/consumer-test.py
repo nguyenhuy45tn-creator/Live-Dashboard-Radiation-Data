@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv(override=True)
 
-TOPIC = os.getenv("KAFKA_TOPIC")
-BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+TOPIC = 'output_topic'
+BOOTSTRAP_SERVERS = 'localhost:29092'
 GROUP_ID = os.getenv("KAFKA_CONSUMER_GROUP_ID", "default-group")
 
 consumer = KafkaConsumer(
