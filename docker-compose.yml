@@ -2,49 +2,62 @@
 version: "2.2"
 services:
 
-  # jobmanager:
-  #   image: flink:1.20.1-scala_2.12
-  #   platform: linux/amd64
-  #   build: .
-  #   ports:
-  #     - "8081:8081"
-  #   volumes:
-  #     - type: bind
-  #       source: ./src
-  #       target: /opt/flink/src
-  #     - type: bind
-  #       source: ./out
-  #       target: /opt/flink/out
-  #   command: jobmanager
-  #   environment:
-  #     - |
-  #       FLINK_PROPERTIES=
-  #       jobmanager.rpc.address: jobmanager        
-  #   networks:
-  #     - kafka-flink-network    
+  jobmanager:
+    image: flink:1.20.1-scala_2.12
+    platform: linux/amd64
+    build: .
+    ports:
+      - "8081:8081"
+    volumes:
+      - type: bind
+        source: ./src
+        target: /opt/flink/src
+      - type: bind
+        source: ./out
+        target: /opt/flink/out
+      - type: bind
+        source: jar-files
+        target: /opt/flink/jar-files
+      - type: bind
+        source: ./.venv
+        target: /opt/flink/.venv
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager        
+    networks:
+      - kafka-flink-network    
 
-  # taskmanager:
-  #   image: flink:1.20.1-scala_2.12
-  #   platform: linux/amd64
-  #   build: .
-  #   depends_on:
-  #     - jobmanager
-  #   volumes:
-  #     - type: bind
-  #       source: ./src
-  #       target: /opt/flink/src
-  #     - type: bind
-  #       source: ./out
-  #       target: /opt/flink/out
-  #   command: taskmanager
-  #   scale: 1
-  #   environment:
-  #     - |
-  #       FLINK_PROPERTIES=
-  #       jobmanager.rpc.address: jobmanager
-  #       taskmanager.numberOfTaskSlots: 2   
-  #   networks:
-  #     - kafka-flink-network 
+  taskmanager:
+    image: flink:1.20.1-scala_2.12
+    platform: linux/amd64
+    build: .
+    depends_on:
+      - jobmanager
+    volumes:
+      - type: bind
+        source: ./src
+        target: /opt/flink/src
+      - type: bind
+        source: ./out
+        target: /opt/flink/out
+      - type: bind
+        source: jar-files
+        target: /opt/flink/jar-files
+      - type: bind
+        source: ./.venv
+        target: /opt/flink/.venv
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10   
+    networks:
+      - kafka-flink-network 
+
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -75,7 +88,8 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-
+    networks:
+      - kafka-flink-network 
   db:
       image: postgres
       ports:

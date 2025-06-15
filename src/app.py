@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 
 
 app = Dash()
-engine = create_engine("postgresql+psycopg2://flask_server:iloveyou@localhost:5432/postgres", echo=True)
+engine = create_engine("postgresql+psycopg2://postgres:example@localhost:5432/postgres", echo=True)
 
 app.layout = html.Div([
     html.Div(children="World map"),

@@ -36,12 +36,16 @@ def stream_csv_to_kafka(file_path, topic, chunk_size=100):
     #         producer.flush()
     #         time.sleep(SEND_INTERVAL) 
     with open(file_path,'r') as file:
-        for line in file:
+        lines=file.readlines()
+        lines.reverse()
+        for enum, line in enumerate(lines, start=1):
             record = line
-            print(f"[Producer (Topic: {TOPIC})] Sending: {record}")
+            # print(f"[Producer (Topic: {TOPIC})] Sending: {record}")
             producer.send(topic, record)
-            producer.flush()
-            time.sleep(SEND_INTERVAL) 
+            if enum % chunk_size == 0:
+                producer.flush()
+                print(f"[Producer (Topic: {TOPIC})] Sending: {record}")
+                time.sleep(SEND_INTERVAL) 
     print("Finished streaming CSV to Kafka.")
     producer.close()
 
